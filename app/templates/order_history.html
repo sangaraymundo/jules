@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    {% if orders.items %}
+        <div class="list-group">
+            {% for order in orders.items %}
+            <a href="{{ url_for('order_confirmation', order_id=order.id) }}" class="list-group-item list-group-item-action flex-column align-items-start mb-3 shadow-sm">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Order #{{ order.id }}</h5>
+                    <small class="text-muted">{{ order.order_date.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+                <p class="mb-1">
+                    Total: <strong>${{ "%.2f"|format(order.total_amount) }}</strong>
+                </p>
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                    <small>Status: <span class="badge badge-{% if order.status == 'Paid' %}success{% elif order.status == 'Shipped'%}info{% else %}secondary{% endif %}">{{ order.status }}</span></small>
+                    <button class="btn btn-sm btn-outline-primary">View Details</button>
+                </div>
+                <div class="mt-2">
+                    {% for item in order.items[:3] %} {# Show first 3 items as preview #}
+                        <img src="{{ url_for('static', filename='product_images/' + item.product.image_file if item.product.image_file else 'product_images/default.jpg') }}"
+                             alt="{{ item.product.name }}" class="img-thumbnail" style="width: 40px; height: 40px; object-fit: cover;">
+                    {% endfor %}
+                    {% if order.items|length > 3 %}
+                        <span class="badge badge-light">+ {{ order.items|length - 3 }} more</span>
+                    {% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if orders.pages > 1 %}
+        <nav aria-label="Order history navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if orders.has_prev %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('order_history', page=orders.prev_num) }}">Previous</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                {% endif %}
+
+                {% for page_num in orders.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        {% if orders.page == page_num %}
+                            <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('order_history', page=page_num) }}">{{ page_num }}</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if orders.has_next %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('order_history', page=orders.next_num) }}">Next</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            You have no past orders. <a href="{{ url_for('product_list') }}">Start shopping!</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}

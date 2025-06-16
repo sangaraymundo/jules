@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    {% if cart_item_count > 0 %}
+        <div class="row">
+            <div class="col-lg-8">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col" style="width: 15%;">Product</th>
+                            <th scope="col" style="width: 30%;"></th>
+                            <th scope="col" class="text-center">Price</th>
+                            <th scope="col" class="text-center">Quantity</th>
+                            <th scope="col" class="text-right">Total</th>
+                            <th scope="col" class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product_id, item in cart.items() %}
+                        <tr>
+                            <td>
+                                {% if item.image %}
+                                    <img src="{{ url_for('static', filename='product_images/' + item.image) }}" alt="{{ item.name }}" class="img-fluid rounded" style="max-height: 75px;">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='product_images/default.jpg') }}" alt="Default" class="img-fluid rounded" style="max-height: 75px;">
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('product_detail', product_id=product_id|int) }}">{{ item.name }}</a>
+                            </td>
+                            <td class="text-center">${{ "%.2f"|format(item.price) }}</td>
+                            <td class="text-center">
+                                <form action="{{ url_for('update_cart', product_id=product_id|int) }}" method="POST" class="form-inline justify-content-center">
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="0" class="form-control form-control-sm" style="width: 70px;">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary ml-1">Update</button>
+                                </form>
+                            </td>
+                            <td class="text-right">${{ "%.2f"|format(item.price * item.quantity) }}</td>
+                            <td class="text-center">
+                                <form action="{{ url_for('remove_from_cart', product_id=product_id|int) }}" method="POST">
+                                    <button type="submit" class="btn btn-sm btn-danger">&times;</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Cart Summary</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Subtotal
+                                <span>${{ "%.2f"|format(cart_total_amount) }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Shipping
+                                <span>$0.00</span> <!-- Placeholder -->
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center font-weight-bold">
+                                Total
+                                <span>${{ "%.2f"|format(cart_total_amount) }}</span> <!-- Assuming total is same as subtotal for now -->
+                            </li>
+                        </ul>
+                        <a href="#" class="btn btn-primary btn-block mt-3">Proceed to Checkout</a> <!-- Placeholder -->
+                        <a href="{{ url_for('product_list') }}" class="btn btn-outline-secondary btn-block mt-2">Continue Shopping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            Your cart is currently empty. <a href="{{ url_for('product_list') }}">Find something to buy!</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}

@@ -1,0 +1,77 @@
+{% extends "admin/admin_base.html" %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <h1 class="mt-4">{{ title }}</h1>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Order #{{ order.id }} for {{ order.customer.username }}</h6>
+            <a href="{{ url_for('admin.manage_orders') }}" class="btn btn-sm btn-outline-secondary">Back to Orders</a>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Customer Details:</h5>
+                    <p><strong>User ID:</strong> {{ order.customer.id }}</p>
+                    <p><strong>Username:</strong> {{ order.customer.username }}</p>
+                    <p><strong>Email:</strong> {{ order.customer.email }}</p>
+                    <p><strong>Role:</strong> {{ order.customer.role|capitalize }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Order Information:</h5>
+                    <p><strong>Order ID:</strong> {{ order.id }}</p>
+                    <p><strong>Order Date:</strong> {{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                    <p><strong>Total Amount:</strong> ${{ "%.2f"|format(order.total_amount) }}</p>
+                    <p><strong>Status:</strong>
+                        <span class="badge badge-{% if order.status == 'Paid' %}success{% elif order.status == 'Shipped'%}info{% else %}secondary{% endif %}">
+                            {{ order.status|capitalize }}
+                        </span>
+                    </p>
+                    {# Add form here to update order status if needed in future #}
+                </div>
+            </div>
+
+            <hr>
+
+            <h5>Order Items:</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Image</th>
+                            <th>Product Name</th>
+                            <th>Quantity</th>
+                            <th>Price at Purchase</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items %}
+                        <tr>
+                            <td>{{ item.product.id }}</td>
+                            <td>
+                                <img src="{{ url_for('static', filename='product_images/' + item.product.image_file if item.product.image_file else 'product_images/default.jpg') }}"
+                                     alt="{{ item.product.name }}" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                            </td>
+                            <td><a href="{{ url_for('product_detail', product_id=item.product.id) }}">{{ item.product.name }}</a></td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ "%.2f"|format(item.price_at_purchase) }}</td>
+                            <td>${{ "%.2f"|format(item.quantity * item.price_at_purchase) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+             {# Placeholder for shipping address if it were part of the Order model
+            <hr>
+            <h5>Shipping Address:</h5>
+            <p>
+                Placeholder Street, 123<br>
+                City, State, ZIP
+            </p>
+            #}
+        </div>
+    </div>
+</div>
+{% endblock admin_content %}

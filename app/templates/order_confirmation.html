@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h2 class="mb-0">{{ title }} - Order #{{ order.id }}</h2>
+        </div>
+        <div class="card-body">
+            <h4 class="card-title">Thank You, {{ current_user.username }}!</h4>
+            <p class="card-text">Your order has been successfully placed and is being processed.</p>
+
+            <h5>Order Summary:</h5>
+            <ul class="list-group list-group-flush">
+                {% for item in order.items %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        <img src="{{ url_for('static', filename='product_images/' + item.product.image_file if item.product.image_file else 'product_images/default.jpg') }}"
+                             alt="{{ item.product.name }}" class="img-thumbnail mr-2" style="width: 50px; height: 50px; object-fit: cover;">
+                        {{ item.product.name }} (x{{ item.quantity }})
+                    </span>
+                    <span>${{ "%.2f"|format(item.price_at_purchase * item.quantity) }}</span>
+                </li>
+                {% endfor %}
+                <li class="list-group-item d-flex justify-content-between align-items-center font-weight-bold">
+                    <span>Total Paid</span>
+                    <span>${{ "%.2f"|format(order.total_amount) }}</span>
+                </li>
+            </ul>
+
+            <p class="mt-3"><strong>Order Date:</strong> {{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            <p><strong>Order Status:</strong> <span class="badge badge-info">{{ order.status }}</span></p>
+            <!-- Placeholder for shipping information if available -->
+            <!-- <p><strong>Shipping Address:</strong> ... </p> -->
+
+            <hr>
+            <div class="text-center">
+                <a href="{{ url_for('order_history') }}" class="btn btn-outline-primary">View Order History</a>
+                <a href="{{ url_for('home') }}" class="btn btn-primary">Continue Shopping</a>
+            </div>
+        </div>
+        <div class="card-footer text-muted">
+            We'll send an email confirmation to {{ current_user.email }} shortly. (Email sending not implemented yet).
+        </div>
+    </div>
+</div>
+{% endblock content %}

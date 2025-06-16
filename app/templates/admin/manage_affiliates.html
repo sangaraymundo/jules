@@ -1,0 +1,91 @@
+{% extends "admin/admin_base.html" %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <h1 class="mt-4">{{ title }}</h1>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">All Affiliates</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTableAffiliates" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User (Username)</th>
+                            <th>Affiliate Code</th>
+                            <th>Commission Rate</th>
+                            <th>Status</th>
+                            <th>Total Commission Earned</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for affiliate_data in affiliates.items %}
+                        {% set affiliate = affiliate_data.Affiliate %}
+                        {% set total_commission = affiliate_data.total_commission_earned or 0.0 %}
+                        <tr>
+                            <td>{{ affiliate.id }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.edit_user', user_id=affiliate.user.id) }}">{{ affiliate.user.username }}</a>
+                                <br><small class="text-muted">{{ affiliate.user.email }}</small>
+                            </td>
+                            <td><code>{{ affiliate.affiliate_code }}</code></td>
+                            <td>{{ "%.0f%%"|format(affiliate.commission_rate * 100) }}</td>
+                            <td>
+                                {% if affiliate.is_active %}
+                                    <span class="badge badge-success">Active</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>${{ "%.2f"|format(total_commission) }}</td>
+                            <td>{{ affiliate.created_at.strftime('%Y-%m-%d %H:%M') if affiliate.created_at else 'N/A' }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.edit_user', user_id=affiliate.user.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i> Edit Profile
+                                </a>
+                                {# Add link to view referred orders if needed #}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if affiliates.pages > 1 %}
+            <nav aria-label="Affiliate list navigation">
+                <ul class="pagination justify-content-center">
+                    {% if affiliates.has_prev %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('admin.manage_affiliates', page=affiliates.prev_num) }}">Previous</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                    {% endif %}
+
+                    {% for page_num in affiliates.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                            {% if affiliates.page == page_num %}
+                                <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="{{ url_for('admin.manage_affiliates', page=page_num) }}">{{ page_num }}</a></li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if affiliates.has_next %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('admin.manage_affiliates', page=affiliates.next_num) }}">Next</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock admin_content %}

@@ -1,0 +1,17 @@
+Flask==2.0.1
+Flask-SQLAlchemy==2.5.1
+Flask-Migrate==3.1.0
+Werkzeug==2.0.3
+SQLAlchemy==1.4.46
+MarkupSafe==2.0.1
+Jinja2==3.0.3
+itsdangerous==2.0.1
+click==8.0.4
+alembic==1.7.7
+Mako==1.1.6
+greenlet==1.1.2
+typing-extensions>=3.7.4
+Flask-Login==0.5.0
+Flask-Bcrypt==1.0.1
+Flask-WTF==1.0.0
+WTForms[email]==3.0.0a1 # For email validation

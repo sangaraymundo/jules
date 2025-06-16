@@ -1,0 +1,96 @@
+{% extends "admin/admin_base.html" %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <h1 class="mt-4">{{ title }}</h1>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Modify User Details</h6>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('admin.edit_user', user_id=user_to_edit.id) }}">
+                <div class="form-group row">
+                    <label for="username" class="col-sm-2 col-form-label">Username</label>
+                    <div class="col-sm-10">
+                        <input type="text" readonly class="form-control-plaintext" id="username" value="{{ user_to_edit.username }}">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="email" class="col-sm-2 col-form-label">Email</label>
+                    <div class="col-sm-10">
+                        <input type="text" readonly class="form-control-plaintext" id="email" value="{{ user_to_edit.email }}">
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="role" class="col-sm-2 col-form-label">User Role</label>
+                    <div class="col-sm-10">
+                        <select class="form-control" id="role" name="role" onchange="toggleAffiliateFields()">
+                            {% for role_option in available_roles %}
+                                <option value="{{ role_option }}" {% if user_to_edit.role == role_option %}selected{% endif %}>
+                                    {{ role_option|capitalize }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="is_active" class="col-sm-2 col-form-label">User Status</label>
+                    <div class="col-sm-10">
+                        <select class="form-control" id="is_active" name="is_active">
+                            <option value="true" {% if user_to_edit.is_active %}selected{% endif %}>Active</option>
+                            <option value="false" {% if not user_to_edit.is_active %}selected{% endif %}>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Affiliate Specific Fields -->
+                <div id="affiliate_fields" style="display: {% if user_to_edit.role == 'affiliate' %}block{% else %}none{% endif %};">
+                    <hr>
+                    <h5>Affiliate Details</h5>
+                    {% if affiliate_profile %}
+                    <div class="form-group row">
+                        <label for="affiliate_code" class="col-sm-2 col-form-label">Affiliate Code</label>
+                        <div class="col-sm-10">
+                            <input type="text" readonly class="form-control-plaintext" id="affiliate_code" value="{{ affiliate_profile.affiliate_code }}">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="commission_rate" class="col-sm-2 col-form-label">Commission Rate</label>
+                        <div class="col-sm-10">
+                            <input type="number" step="0.01" min="0" max="1" class="form-control" id="commission_rate" name="commission_rate" value="{{ affiliate_profile.commission_rate }}">
+                            <small class="form-text text-muted">Enter as a decimal (e.g., 0.1 for 10%).</small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="affiliate_is_active" class="col-sm-2 col-form-label">Affiliate Status</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" id="affiliate_is_active" name="affiliate_is_active">
+                                <option value="true" {% if affiliate_profile.is_active %}selected{% endif %}>Active</option>
+                                <option value="false" {% if not affiliate_profile.is_active %}selected{% endif %}>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label">Created On</label>
+                        <div class="col-sm-10">
+                             <input type="text" readonly class="form-control-plaintext" value="{{ affiliate_profile.created_at.strftime('%Y-%m-%d %H:%M') if affiliate_profile.created_at else 'N/A' }}">
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="col-sm-10 offset-sm-2 text-muted">No affiliate profile exists. It will be created if role is set to 'Affiliate'.</p>
+                    {% endif %}
+                </div>
+
+                <div class="form-group row mt-3">
+                    <div class="col-sm-10 offset-sm-2">
+                        <button type="submit" class="btn btn-primary">Update User</button>
+                        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock admin_content %}

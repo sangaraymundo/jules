@@ -1,0 +1,89 @@
+{% extends "admin/admin_base.html" %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <h1 class="mt-4">{{ title }}</h1>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">All Users</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTableUsers" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Registered</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user_item in users.items %}
+                        <tr>
+                            <td>{{ user_item.id }}</td>
+                            <td>{{ user_item.username }}</td>
+                            <td>{{ user_item.email }}</td>
+                            <td>
+                                <span class="badge badge-{% if user_item.role == 'admin' %}danger{% elif user_item.role == 'affiliate' %}warning{% else %}primary{% endif %}">
+                                    {{ user_item.role|capitalize }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if user_item.is_active %}
+                                    <span class="badge badge-success">Active</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user_item.orders.first().order_date.strftime('%Y-%m-%d') if user_item.orders else 'N/A' }}</td> {# Example, assuming User model has 'date_registered' or similar #}
+                               {# For now, using first order date as proxy or N/A. You might want a dedicated registration_date field on User model #}
+                            <td>
+                                <a href="{{ url_for('admin.edit_user', user_id=user_item.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i> Edit
+                                A>
+                                {# Add delete user button if needed, with caution #}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if users.pages > 1 %}
+            <nav aria-label="User list navigation">
+                <ul class="pagination justify-content-center">
+                    {% if users.has_prev %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('admin.manage_users', page=users.prev_num) }}">Previous</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                    {% endif %}
+
+                    {% for page_num in users.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                            {% if users.page == page_num %}
+                                <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="{{ url_for('admin.manage_users', page=page_num) }}">{{ page_num }}</a></li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if users.has_next %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('admin.manage_users', page=users.next_num) }}">Next</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock admin_content %}

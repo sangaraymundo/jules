@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }} - Welcome, {{ current_user.username }}!</h2>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Your Affiliate Details</h6>
+        </div>
+        <div class="card-body">
+            <p><strong>Your Unique Referral Code:</strong> <code>{{ affiliate.affiliate_code }}</code></p>
+            <p><strong>Your Referral Link:</strong>
+                <a href="{{ referral_link }}" target="_blank">{{ referral_link }}</a>
+                <button class="btn btn-sm btn-outline-secondary ml-2" onclick="copyToClipboard('{{ referral_link }}')">Copy Link</button>
+            </p>
+            <p><strong>Your Commission Rate:</strong> {{ "%.0f%%"|format(affiliate.commission_rate * 100) }}</p>
+            <p><strong>Status:</strong>
+                {% if affiliate.is_active %}
+                    <span class="badge badge-success">Active</span>
+                {% else %}
+                    <span class="badge badge-danger">Inactive</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Performance Summary</h6>
+        </div>
+        <div class="card-body">
+            <p><strong>Total Referred Orders:</strong> {{ referred_orders.total }}</p>
+            <p><strong>Total Commission Earned:</strong> ${{ "%.2f"|format(total_commission) }}</p>
+            {# Add more stats like conversion rate, pending payouts if available #}
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Referred Orders</h6>
+        </div>
+        <div class="card-body">
+            {% if referred_orders.items %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Order Total</th>
+                                <th>Commission Earned</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in referred_orders.items %}
+                            <tr>
+                                <td><a href="{{ url_for('order_confirmation', order_id=order.id) }}">#{{ order.id }}</a></td>
+                                <td>{{ order.order_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>${{ "%.2f"|format(order.total_amount) }}</td>
+                                <td>${{ "%.2f"|format(order.commission_earned) }}</td>
+                                <td><span class="badge badge-{% if order.status == 'Paid' %}success{% else %}secondary{% endif %}">{{ order.status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination for Referred Orders -->
+                {% if referred_orders.pages > 1 %}
+                <nav aria-label="Referred orders navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if referred_orders.has_prev %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('affiliate_dashboard', page=referred_orders.prev_num) }}">Previous</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                        {% endif %}
+                        {% for page_num in referred_orders.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                            {% if page_num %}
+                                {% if referred_orders.page == page_num %}
+                                    <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                                {% else %}
+                                    <li class="page-item"><a class="page-link" href="{{ url_for('affiliate_dashboard', page=page_num) }}">{{ page_num }}</a></li>
+                                {% endif %}
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if referred_orders.has_next %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('affiliate_dashboard', page=referred_orders.next_num) }}">Next</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Next</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <p>No orders have been referred by you yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        alert('Referral link copied to clipboard!');
+    }, function(err) {
+        alert('Could not copy text: ', err);
+    });
+}
+</script>
+{% endblock content %}

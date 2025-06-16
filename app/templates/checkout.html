@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    {% if cart and cart_item_count > 0 %}
+    <div class="row">
+        <!-- Order Summary Column -->
+        <div class="col-md-7">
+            <h4>Order Summary</h4>
+            <ul class="list-group mb-3">
+                {% for product_id, item in cart.items() %}
+                <li class="list-group-item d-flex justify-content-between lh-condensed">
+                    <div>
+                        <h6 class="my-0">{{ item.name }}</h6>
+                        <small class="text-muted">Quantity: {{ item.quantity }}</small>
+                    </div>
+                    <span class="text-muted">${{ "%.2f"|format(item.price * item.quantity) }}</span>
+                </li>
+                {% endfor %}
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Total (USD)</span>
+                    <strong>${{ "%.2f"|format(total_amount) }}</strong>
+                </li>
+            </ul>
+            <a href="{{ url_for('cart_view') }}" class="btn btn-outline-secondary mb-3">Edit Cart</a>
+        </div>
+
+        <!-- Payment/Confirmation Column -->
+        <div class="col-md-5">
+            <h4>Shipping & Payment</h4>
+            <p class="text-muted">
+                This is a simplified checkout. Real payment and shipping details would be collected here.
+            </p>
+
+            <!-- Display current user's email as a placeholder for shipping info -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Ship To:</h5>
+                    <p class="card-text">
+                        <strong>{{ current_user.username }}</strong><br>
+                        {{ current_user.email }}<br>
+                        <!-- Add more address fields here if they existed on the User model -->
+                        123 Example Street<br>
+                        Anytown, USA 12345
+                    </p>
+                    <small class="text-muted">(This is placeholder shipping information)</small>
+                </div>
+            </div>
+
+            <form action="{{ url_for('process_payment') }}" method="POST">
+                <!-- Mock Payment Section -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Mock Payment</h5>
+                        <p>Clicking "Confirm & Pay" will simulate a successful payment.</p>
+                        <!-- In a real scenario, you'd have Stripe Elements, PayPal button, etc. -->
+                        <button type="submit" class="btn btn-primary btn-lg btn-block">Confirm & Pay</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning" role="alert">
+      Your cart is empty. You cannot proceed to checkout. Please <a href="{{ url_for('product_list') }}">add some products</a>.
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

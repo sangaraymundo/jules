@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome to your Dashboard, {{ current_user.username }}!</h1>
+        <p class="lead">This is a protected page that only logged-in users can see.</p>
+        <hr class="my-4">
+        <p>Here you might see your profile information, settings, or other user-specific content.</p>
+        <p>Your email: {{ current_user.email }}</p>
+        <p>Your role: {{ current_user.role }}</p>
+        {% if current_user.affiliate_profile %}
+            <p>Your affiliate code: {{ current_user.affiliate_profile.affiliate_code }}</p>
+            <p>Commission rate: {{ current_user.affiliate_profile.commission_rate * 100 }}%</p>
+        {% endif %}
+    </div>
+{% endblock %}
